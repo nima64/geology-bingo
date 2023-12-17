@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    "module": "commonjs"
+    "module": "commonjs",
+    "outDir": "out",
+    "sourceMap": true
   },
-  "extends":"@tsconfig/recommended/tsconfig.json"
+  "extends":"@tsconfig/recommended/tsconfig.json",
 }
