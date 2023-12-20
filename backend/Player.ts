@@ -1,20 +1,9 @@
-// // export export function scrableCallist(callist: [][]) {}
-export function getPlayerById(players: Player[], id: string) {
-  return players.find((x) => x.id == id);
-}
-
 // export function sendCurrentPlayerBoard(sockId: any, socket: any) {
 //   let player: Player | undefined = getPlayerById(sockId);
 //   if (!player)
 //     throw new Error(`player with id ${sockId} not found in player list`);
 //   socket.to(sockId).emit("update board", { board: getBoard(player) });
 // }
-
-enum gameStates {
-  WAITING,
-  PLAYING,
-}
-
 export interface BoardItem {
   question: string;
   answered: boolean;
@@ -22,7 +11,6 @@ export interface BoardItem {
 
 export interface Player {
   id: string;
-  //TODO: change to single array with objects {question:string, answered:boolean}
   board: BoardItem[]; // question answered
   board_size: number;
 }
@@ -58,44 +46,7 @@ export function getBoardAnswers(player: Player): number[] {
   return player.board.flatMap((element: BoardItem) => Number(element.answered));
 }
 
-//gives 2d matrix of a 1d matrix
-const fmtMat = (vec: number[], matSize: number) => {
-  let x = "";
-  for (let i = 0; i < vec.length; i++) {
-    x = x + " " + vec[i].toString();
-    if ((i + 1) % matSize == 0) x = x + "\n";
-  }
-  return x;
-};
-
-export function hasBingo(player: Player, boardSize: number): boolean {
-  let full_lr_diag = true;
-  let full_rl_diag = true;
-  let board = getBoardAnswers(player);
-
-  for (let i = 0; i < boardSize; i++) {
-    let full_row = true;
-    let full_col = true;
-    let k = boardSize - 1 - i;
-
-    //mat[i][i] != 1
-    if (Number(board[boardSize * i + i]) != 1) full_lr_diag = false;
-
-    //mat[k][k] != 1
-    if (Number(board[boardSize * k + k]) != 1) full_rl_diag = false;
-
-    for (let j = 0; j < boardSize; j++) {
-      //mat[i][j] != 1
-      if (Number(board[boardSize * i + j]) != 1) full_row = false;
-
-      //mat[j][i] != 1
-      if (Number(board[boardSize * j + i]) != 1) full_col = false;
-    }
-    if (full_col || full_row) {
-      return true;
-    }
-  }
-  if (full_lr_diag || full_rl_diag) return true;
-
-  return false;
+// // export export function scrableCallist(callist: [][]) {}
+export function getPlayerById(players: Player[], id: string) {
+  return players.find((x) => x.id == id);
 }

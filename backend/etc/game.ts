@@ -12,20 +12,18 @@ let gameState = gameS.WAITING;
 type Players = Record<string, Array<number>>;
 
 // let Game:any = {
-//   players:{}, 
+//   players:{},
 //   state: gameS.WAITING
 // };
 
-let playerCount = 0;
+// let playerCount = 0;
 
 let players: Players = {};
 
 // ["a", "b", "c", "d"].map((p) => {
 //   players[p] = Array<number>(25).fill(0);
-//   Game.players[p] = Array<number>(25).fill(0); 
+//   Game.players[p] = Array<number>(25).fill(0);
 // });
-
-let curr_round_answer = "Inner Core";
 
 function shuffleArray(array: any[]) {
   for (var i = array.length - 1; i > 0; i--) {
@@ -50,7 +48,7 @@ function simulateGuesses(players: Players, maxNum: number): [string, number][] {
 }
 
 //gives 2d matrix of a 1d matrix
-const fmtMat = (vec: number[], matSize: number) => {
+const fmtMat = (vec: number[] | boolean[], matSize: number) => {
   let x = "";
   for (let i = 0; i < vec.length; i++) {
     x = x + " " + vec[i].toString();
@@ -122,7 +120,7 @@ function hasBingo(board: number[], boardSize: number) {
 //       console.log(Game.gameState);
 //       break;
 //     }
-//   } 
+//   }
 //   console.log("waiting for players to join room");
 // }
 
