@@ -1,6 +1,11 @@
 import { Player, updateBoard } from "./Player";
 import { fmtMat, getBoardAnswers, getPlayerById, hasBingo } from "./utils";
 
+/**
+ * Game Logic only handles game logic and tries to be independent of net code
+ * It's a statemachine that changes 
+ * 
+ * * */
 enum GAME_STATE {
   WAITING,
   PLAYING,
@@ -18,9 +23,6 @@ export class GameLogic {
 
   roundAnswer = "Antarctic Circle";
 
-  // constructor(players: Player[]) {
-  //   // players = players;
-  // }
   addPlayer(player: Player) {
     this.players.push(player);
   }

@@ -26,7 +26,11 @@
   cursor: pointer;
 }
 .child:hover{
+<<<<<<< HEAD
   background-color: #b1c1be9a;
+=======
+  background-color: #27b396;
+>>>>>>> 757ab98 (front end board syncs with backend)
   color: white;
   cursor: pointer;
 }
