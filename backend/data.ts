@@ -1,6 +1,6 @@
 let playerCount = 0;
 
-let calllist = [
+export let calllist = [
   ["oceanic", "the heavier, denser, basaltic crust."],
   [
     "asthenosphere",

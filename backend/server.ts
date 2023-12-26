@@ -1,109 +1,78 @@
 import { Server } from "socket.io";
-import {
-  BoardItem,
-  Player,
-  updateBoard,
-  getBoardAnswers,
-  getBoardQuestions,
-  getPlayerById,
-} from "./utils";
+import { Player, fillPlayerBoard } from "./Player";
+import { Game } from "./Game";
+import { calllist } from "./data";
 
-//[id, answer]
-let answer_stack: [string, string][] = [];
+// type Sock = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
+
+/** update client board with server board */
+const syncBoard = (io: any, player: Player) => {
+  console.log(`syncing board for ${player.id}`);
+  io.to(player.id).emit("sync_board", { board: player.board });
+};
+
+let wordList = calllist.map((x) => x[0]);
+
+//TODO players are subscribers lists for game state changes
+let players: Player[] = [];
+
+// //[id, answer]
+// let answer_stack: [string, string][] = [];
 
 const io = new Server(3000);
 
-const syncBoard = (socket: any, player: Player) => {
-  socket.to(player.id).emit("updated board", { board: player.board });
-};
-
-const updateBoardSynced = (socket: any, player: Player, answer: string) => {
-  updateBoard(player, answer, true);
-  syncBoard(socket, player);
-};
-
-//TODO players are subscribers lists for game state changes
-let _players: Player[] = [];
-
 let curr_round_answer = "Inner Core";
+let currGame = new Game();
 
-io.on("connection", (serverSock) => {
-  console.log(`got a connection from socket ${serverSock.id}`);
+io.on("connection", (socket) => {
+  console.log(`got a connection from socket ${socket.id}`);
 
   let player: Player = {
-    id: serverSock.id,
+    id: socket.id,
+    username: "unknown",
     board: [],
     board_size: 5,
   };
 
-  _players.push(player);
+  fillPlayerBoard(player, calllist, false);
+  currGame.addPlayer(player);
+  // players.push(player);
 
-  syncBoard(serverSock, player);
+  // syncBoard(socket, player);
 
-  serverSock.on("set username", (name: string) => {
-    serverSock.data.username = name;
+  socket.on("call_list", (callback) => {
+    callback({ call_list: calllist });
+  });
+
+  socket.on("set username", (name: string, callback) => {
+    socket.data.username = name;
+    player.username = name;
 
     console.log(name);
     if (name == "host") {
-      serverSock.join("host");
-      serverSock.emit("getCallList", { calllist: calllist });
+      socket.join("host");
     }
+    callback("recieved");
   });
 
-  serverSock.on("message", (msg: string) => {
-    console.log(`message ${msg} from ${serverSock.id}`);
+  socket.on("message", (msg: string) => {
+    console.log(`message ${msg} from ${socket.id}`);
   });
 
-  serverSock.on("start round", (clue: string) => {
+  socket.on("start round", (clue: string) => {
     console.log(`selected clue: ${clue}`);
+    currGame.startRound(clue);
     // serverSock.emit("message", curr_round_clue);
   });
 
-  // socket.on("submit answer", (answer: string) => {
-  //   for (const a of answer_stack)
-  //     let [id, p_answer] = a;
-  //     //answer already on the stack
-  //     if (id === socket.id) {
-  //       console.log(
-  //         `${socket.data.username} already answered ${p_answer} this round`
-  //       );
-  //       return;
-  //     }
-  //   }
-  //   answer_stack.push([socket.id, answer]);
-  // });
+  socket.on("submit answer", (answer: string) => {
+    currGame.submitAnswer(answer, socket.id);
+    // updateBoard(player, answer, true);
+    syncBoard(io, player);
+  });
 
-  serverSock.on("end round", () => {
-    //Todo: move to into Game Object
-    while (answer_stack.length > 0) {
-      let top = answer_stack.pop();
-      if (!top) continue;
-
-      let [top_id, top_answer] = top;
-
-      let player = getPlayerById(_players, top_id);
-
-      if (!player) continue;
-      let playerSocket = io.sockets.sockets.get(player.id);
-
-      //correct answer then their board gets marked
-      //TODO: wrap in function and emit to player updated board state
-      if (player && top_answer == curr_round_answer) {
-        updateBoardSynced(serverSock, player, curr_round_answer);
-
-        console.log(`player ${playerSocket?.data.username} guessed correct`);
-
-        console.log(
-          `${playerSocket?.data.username}'s board \n${fmtMat(
-            getBoardAnswers(player),
-            player.board_size
-          )}`
-        );
-
-        if (hasBingo(getBoardAnswers(player), player.board_size)) {
-          console.log(`congrats player ${player.id} won`);
-        }
-      }
-    }
+  socket.on("end round", () => {
+    currGame.endRound(socket, curr_round_answer);
+    syncBoard(io, player);
   });
 });

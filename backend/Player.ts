@@ -12,21 +12,29 @@ export interface BoardItem {
 export interface Player {
   id: string;
   board: BoardItem[]; // question answered
+  username: string;
   board_size: number;
 }
 
-const fillPlayerBoard = (player: any, callList: any, freeSpace: boolean) => {
-  callList.map(([word, clue]: any, i: number) => {
-    //put free space in the middle, assumes call list size is 24
-    if (i == 12) {
-      player.board_idx["Free Space"] = 25;
-      player.board_qa["Free Space"] = false;
-      i = 25;
+//Free space then added to the middle of the board
+export const fillPlayerBoard = (
+  player: Player,
+  callList: string[][],
+  freeSpace: boolean
+) => {
+  let boardMiddle = Math.floor(player.board_size ** 2 / 2);
+  let canInsertFreeSpace =
+    freeSpace && callList.length < player.board_size ** 2;
+
+  for (let i = 0; i < callList.length; i++) {
+    if (canInsertFreeSpace && i == boardMiddle) {
+      player.board[boardMiddle] = { question: "Free Space", answered: false };
+      continue;
     }
 
-    player.board_idx[word] = i;
-    player.board_qa[word] = false;
-  });
+    let [word, clue] = callList[i];
+    player.board[i] = { question: word, answered: false };
+  }
 };
 
 export function updateBoard(

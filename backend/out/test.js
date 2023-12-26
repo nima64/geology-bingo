@@ -13,18 +13,27 @@ const PORT = 3000;
 let sockets = [];
 let socket = (0, socket_io_client_1.io)(`ws://localhost:${PORT}`, { timeout: 5000 });
 let host_sock = (0, socket_io_client_1.io)(`ws://localhost:${PORT}`, { timeout: 5000 });
-let calllist = [];
+let call_list = [];
 socket.on("message", (msg) => {
     console.log(`message: ${msg}`);
 });
-socket.on("getCallList", (data) => {
-    calllist = data.callist;
+socket.on("sync_board", (data) => {
+    console.log(`sync_board: ${data}`);
 });
+async function getCallList() {
+    let resp = await socket.emitWithAck("call_list");
+    return resp.call_list;
+}
+// socket.on("call_list", (data) => {
+//   host_sock.emit("start round", clue);
+// });
 async function hostTest() {
     await socket.emitWithAck("set username", "nima");
     await host_sock.emitWithAck("set username", "host");
-    let idx = Math.random() * 25;
-    let [word, clue] = calllist[idx];
+    let idx = Math.round(Math.random() * 25);
+    call_list = await getCallList();
+    let [word, clue] = call_list[idx];
+    console.log(`word: ${word},\n clue: ${clue}`);
     host_sock.emit("start round", clue);
     console.log(clue);
     socket.emit("submit answer", word);

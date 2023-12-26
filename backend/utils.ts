@@ -1,3 +1,5 @@
+import { BoardItem, Player } from "./Player";
+
 // // export export function scrableCallist(callist: [][]) {}
 export function getPlayerById(players: Player[], id: string) {
   return players.find((x) => x.id == id);
@@ -15,31 +17,19 @@ enum gameStates {
   PLAYING,
 }
 
-export interface BoardItem {
-  question: string;
-  answered: boolean;
-}
+// const fillPlayerBoard = (player: Player, call_list: any, freeSpace: boolean) => {
+//   call_list.map(([word, clue]: any, i: number) => {
+//     //put free space in the middle, assumes call list size is 24
+//     if (i == 12) {
+//       player.boardp[["Free Space"] = 25;
+//       player.board_qa["Free Space"] = false;
+//       i = 25;
+//     }
 
-export interface Player {
-  id: string;
-  //TODO: change to single array with objects {question:string, answered:boolean}
-  board: BoardItem[]; // question answered
-  board_size: number;
-}
-
-const fillPlayerBoard = (player: any, callList: any, freeSpace: boolean) => {
-  callList.map(([word, clue]: any, i: number) => {
-    //put free space in the middle, assumes call list size is 24
-    if (i == 12) {
-      player.board_idx["Free Space"] = 25;
-      player.board_qa["Free Space"] = false;
-      i = 25;
-    }
-
-    player.board_idx[word] = i;
-    player.board_qa[word] = false;
-  });
-};
+//     player.board_idx[word] = i;
+//     player.board_qa[word] = false;
+//   });
+// // };
 
 export function updateBoard(
   player: Player,
@@ -59,7 +49,7 @@ export function getBoardAnswers(player: Player): number[] {
 }
 
 //gives 2d matrix of a 1d matrix
-const fmtMat = (vec: number[], matSize: number) => {
+export const fmtMat = (vec: number[], matSize: number) => {
   let x = "";
   for (let i = 0; i < vec.length; i++) {
     x = x + " " + vec[i].toString();
