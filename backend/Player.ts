@@ -1,9 +1,3 @@
-// export function sendCurrentPlayerBoard(sockId: any, socket: any) {
-//   let player: Player | undefined = getPlayerById(sockId);
-//   if (!player)
-//     throw new Error(`player with id ${sockId} not found in player list`);
-//   socket.to(sockId).emit("update board", { board: getBoard(player) });
-// }
 export interface BoardItem {
   question: string;
   answered: boolean;
