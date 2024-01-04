@@ -1,21 +1,19 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter as Router, Route, Link, Routes } from 'react-router-dom';
+import { GameView } from './Game';
+import { PlayerList } from './Login';
 
+let _GameView = new GameView({});
 function App() {
   return (
-    <div className="App">
-      <div>
-        players:
-        <ul>
-          <li>nyima</li>
-          <li>hein</li>
-          <li>sam</li>
-        </ul>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={PlayerList()} />
+          <Route path="/game" element={<GameView />} />
+        </Routes>
       </div>
-      <div>player count: 0</div>
-      <button>begin game</button>
-    </div>
+    </Router>
   );
 }
 
