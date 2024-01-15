@@ -19,15 +19,16 @@ export const fillPlayerBoard = (
   let boardMiddle = Math.floor(player.board_size ** 2 / 2);
   let canInsertFreeSpace =
     freeSpace && callList.length < player.board_size ** 2;
-
-  for (let i = 0; i < callList.length; i++) {
+  let j = 0;
+  for (let i = 0; i < player.board_size ** 2; i++) {
     if (canInsertFreeSpace && i == boardMiddle) {
-      player.board[boardMiddle] = { question: "Free Space", answered: false };
+      player.board[i] = { question: "Free Space", answered: false };
       continue;
     }
 
-    let [word, clue] = callList[i];
+    let [word, clue] = callList[j];
     player.board[i] = { question: word, answered: false };
+    j++;
   }
 };
 

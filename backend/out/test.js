@@ -24,9 +24,6 @@ async function getCallList() {
     let resp = await socket.emitWithAck("call_list");
     return resp.call_list;
 }
-// socket.on("call_list", (data) => {
-//   host_sock.emit("start round", clue);
-// });
 async function hostTest() {
     await socket.emitWithAck("set username", "nima");
     await host_sock.emitWithAck("set username", "host");

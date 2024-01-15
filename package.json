@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "test": "jest ./backend --detectOpenHandles"
+  },
+  "dependencies": {
+    "jest": "^29.7.0",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2"
+  }
+}

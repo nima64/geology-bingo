@@ -7,7 +7,7 @@ export let calllist = [
     "This is where slow, convective currents occur and is  believed to be the engine that drives Plate Tectonics.",
   ],
   [
-    "inner core,,",
+    "inner core",
     "The portion of the Earth composed primarily of iron and believed to be in a solid state.",
   ],
   [
