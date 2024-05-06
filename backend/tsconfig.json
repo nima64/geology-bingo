@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2022",
     "module": "commonjs",
     "sourceRoot": "src",
     "outDir": "out",
-    "sourceMap": true
+    "sourceMap": true,
+    "typeRoots": ["types", "./node_modules/@types"]
   },
-  "extends":"@tsconfig/recommended/tsconfig.json",
+  "extends": "@tsconfig/recommended/tsconfig.json"
 }

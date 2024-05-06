@@ -15,22 +15,6 @@ const syncAllBoards = (io: any, players: Player[]) => {
   }
 };
 
-class hostBot {
-  game: GameLogic;
-  constructor(game: GameLogic, callList: string[]) {
-    this.game = game;
-  }
-  run(player: Player, serverSock: any) {
-    let playerAnswered = this.game.players.findIndex(
-      (v, i) => v.id == player.id
-    );
-
-    if (playerAnswered) {
-      this.game.endRound();
-    }
-  }
-}
-
 class CallListPicker {
   callListRef: string[][];
   callList: string[][];
@@ -63,6 +47,7 @@ export default class HostBot {
     this.run = this.run.bind(this);
 
     [this.roundAnswer, this.roundClue] = this.clp.pick();
+    console.log("Hostbot starting round");
     this.game.startRound(this.roundClue, this.roundAnswer);
   }
 
@@ -73,6 +58,8 @@ export default class HostBot {
       if (guessedCorrect) {
         console.log(`nima correctly guessed ${this.roundAnswer}`);
         [this.roundAnswer, this.roundClue] = this.clp.pick();
+
+        console.log("Host bot starting round");
         this.game.startRound(this.roundClue, this.roundAnswer);
       }
     }

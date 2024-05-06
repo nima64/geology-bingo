@@ -2,6 +2,8 @@ import { Server } from "socket.io";
 import { Player, fillPlayerBoard } from "./Player";
 import { GameLogic } from "./GameLogic";
 import { calllist } from "./data";
+import HostBot from "./HostBot";
+import { Room, createGameRoomManager } from "./Game";
 
 /** update client board with server board */
 const syncBoard = (io: any, player: Player) => {
@@ -17,12 +19,8 @@ const syncAllBoards = (io: any, players: Player[]) => {
   }
 };
 
-let wordList = calllist.map((x) => x[0]);
-
 let players: Player[] = [];
 
-// //[id, answer]
-// let answer_stack: [string, string][] = [];
 const PORT = 3000;
 const io = new Server(PORT, {
   cors: {
@@ -40,6 +38,39 @@ let hostBot = new HostBot(currGame, calllist, io);
 setInterval(hostBot.run, 1000);
 
 console.log(`Game state: ${currGame.gmState}`);
+
+const roomManager = createGameRoomManager();
+
+let roomIds: string[] = [];
+roomIds.push(roomManager.createRoom());
+
+const readline = require("node:readline");
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+console.log("available game rooms " + roomManager.getRoomIds() + " ");
+
+//TODO make POST end point that checks sessionID if logged in and not already in room than add to room
+// app.post("/joinRoom", (req, res) => {
+//   type sessionAlt = session.Session &
+//     Partial<SessionData> & { roomID: string };
+//   let session = req.session as sessionAlt;
+//   session.count = (session.count || 0) + 1;
+//   res.status(200).end("" + session.count);
+// });
+
+rl.question(`what room do you want to join?`, (myRoomId: any) => {
+  // console.log(`Hi ${name}!`);
+
+  if (!roomManager.getRoomIds().includes(myRoomId))
+    console.log("not an avaiable room");
+  else console.log("joining room " + myRoomId);
+
+  rl.close();
+});
 
 io.on("connection", (socket) => {
   // if ("VERBOSE")
@@ -59,7 +90,9 @@ io.on("connection", (socket) => {
     callback({ call_list: calllist });
   });
 
-  socket.on("set username", (name: string, callback) => {
+  //TODO
+  // Move this into http server as http end point
+  socket.on("new username", (name: string, callback) => {
     socket.data.username = name;
     player.username = name;
 
@@ -79,6 +112,10 @@ io.on("connection", (socket) => {
     console.log("round started");
     console.log(`selected clue: ${clue}`);
     currGame.startRound(clue, answer);
+  });
+
+  socket.on("start round", (clue: string, answer: string) => {
+    console.log("check if this overrides or just adds a callback ");
   });
 
   socket.on("submit answer", (answer: string, callback) => {
