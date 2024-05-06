@@ -1,4 +1,4 @@
-import { BoardItem, Player } from "./Player";
+import { BoardItem, Player } from "./core/Player";
 
 // // export export function scrableCallist(callist: [][]) {}
 export function getPlayerById(players: Player[], id: string) {
@@ -30,6 +30,20 @@ enum gameStates {
 //     player.board_qa[word] = false;
 //   });
 // // };
+
+/** update client board with server board */
+export const syncBoard = (io: any, player: Player) => {
+  if ("VERBOSE")
+    console.log(`syncing board for ${player.username} ${player.id} `);
+
+  io.to(player.id).emit("sync_board", { board: player.board });
+};
+
+export const syncAllBoards = (io: any, players: Player[]) => {
+  for (const player of players) {
+    syncBoard(io, player);
+  }
+};
 
 export function updateBoard(
   player: Player,

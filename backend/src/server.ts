@@ -1,27 +1,18 @@
 import { Server } from "socket.io";
-import { Player, fillPlayerBoard } from "./Player";
-import { GameLogic } from "./GameLogic";
+import { Player, fillPlayerBoard } from "./core/Player";
+import { GameLogic } from "./core/GameLogic";
 import { calllist } from "./data";
-import HostBot from "./HostBot";
-import { Room, createGameRoomManager } from "./Game";
-
-/** update client board with server board */
-const syncBoard = (io: any, player: Player) => {
-  if ("VERBOSE")
-    console.log(`syncing board for ${player.username} ${player.id} `);
-
-  io.to(player.id).emit("sync_board", { board: player.board });
-};
-
-const syncAllBoards = (io: any, players: Player[]) => {
-  for (const player of players) {
-    syncBoard(io, player);
-  }
-};
+import HostBot from "./core/HostBot";
+import { sessionMiddleware } from "./authServer";
+import { Room, createGameRoomManager } from "./core/Game";
+import { syncAllBoards, syncBoard } from "./utils";
+import { SessionData } from "express-session";
+import { IncomingMessage } from "http";
 
 let players: Player[] = [];
 
 const PORT = 3000;
+
 const io = new Server(PORT, {
   cors: {
     origin: `http://localhost:3001`,
@@ -51,57 +42,32 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-console.log("available game rooms " + roomManager.getRoomIds() + " ");
-
 //TODO make POST end point that checks sessionID if logged in and not already in room than add to room
-// app.post("/joinRoom", (req, res) => {
-//   type sessionAlt = session.Session &
-//     Partial<SessionData> & { roomID: string };
-//   let session = req.session as sessionAlt;
-//   session.count = (session.count || 0) + 1;
-//   res.status(200).end("" + session.count);
-// });
 
-rl.question(`what room do you want to join?`, (myRoomId: any) => {
-  // console.log(`Hi ${name}!`);
-
-  if (!roomManager.getRoomIds().includes(myRoomId))
-    console.log("not an avaiable room");
-  else console.log("joining room " + myRoomId);
-
-  rl.close();
-});
+io.engine.use(sessionMiddleware);
 
 io.on("connection", (socket) => {
   // if ("VERBOSE")
+  const session = (socket.request as IncomingMessage & { session: SessionData })
+    .session;
+
   console.log(`got a connection from socket ${socket.id}`);
 
   let player: Player = {
     id: socket.id,
-    username: "unknown",
+    username: session.user ? session.user : "UNKOWN",
     board: [],
     board_size: 5,
   };
 
-  fillPlayerBoard(player, calllist, true);
+  if (player.username == "host") {
+    socket.join("host");
+  }
+  syncBoard(io, player);
   currGame.addPlayer(player);
 
   socket.on("call_list", (callback) => {
     callback({ call_list: calllist });
-  });
-
-  //TODO
-  // Move this into http server as http end point
-  socket.on("new username", (name: string, callback) => {
-    socket.data.username = name;
-    player.username = name;
-
-    console.log(name);
-    if (name == "host") {
-      socket.join("host");
-    }
-    syncBoard(io, player);
-    callback("recieved");
   });
 
   socket.on("message", (msg: string) => {

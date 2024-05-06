@@ -7,16 +7,16 @@ const { Server } = require("socket.io");
 import crypto from "crypto";
 // const session = require("express-session");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const httpServer = createServer(app);
+const authServer = createServer(app);
 
-httpServer.listen(PORT);
+authServer.listen(PORT);
 
 let currentSessionSecret = crypto.randomUUID();
 
@@ -33,20 +33,13 @@ function isAuthenticated(req: any, res: any, next: any) {
   else next("route");
 }
 
+app.use(sessionMiddleware);
+
 app.get("/", function (req, res) {
   // let session: any = req.session;
   // this is only called when there is an authentication user due to isAuthenticated
   res.send("hello, " + "helloworld" + "!" + ' <a href="/logout">Logout</a>');
 });
-
-// app.get("/", function (req, res) {
-//   res.send(
-//     '<form action="/login" method="post">' +
-//       'Username: <input name="user"><br>' +
-//       'Password: <input name="pass" type="password"><br>' +
-//       '<input type="submit" text="Login"></form>'
-//   );
-// });
 
 app.post(
   "/login",
@@ -69,6 +62,28 @@ app.post(
   }
 );
 
+app.post("/room", express.urlencoded({ extended: false }), (req, res, next) => {
+  // regenerate the session, which is good practice to help
+  // guard against forms of session fixation
+  req.session.regenerate(function (err) {
+    if (err) next(err);
+    if (!req.session.user) {
+      const err = new Error("Unauthorized") as Error & { status: number };
+      err.status = 401;
+      return next(err);
+    }
+
+    req.session.room = req.body.room;
+
+    // save the session before redirection to ensure page
+    // load does not happen before session is saved
+    req.session.save(function (err) {
+      if (err) return next(err);
+      res.redirect("/");
+    });
+  });
+});
+
 app.get("/logout", function (req, res, next) {
   req.session.user = null;
   req.session.save(function (err: any) {
@@ -83,9 +98,8 @@ app.get("/logout", function (req, res, next) {
   });
 });
 
-app.use(sessionMiddleware);
-
-export default httpServer;
+export default authServer;
+export { sessionMiddleware };
 
 // io.engine.use(sessionMiddleware);
 
